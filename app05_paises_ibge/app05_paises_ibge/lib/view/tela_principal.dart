@@ -1,25 +1,55 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../model/pais.dart';
 
 class TelaPrincipal extends StatefulWidget {
+  const TelaPrincipal({super.key});
+
   @override
-  _TelaPrincipalState createState() => _TelaPrincipalState();
+  State<TelaPrincipal> createState() => _TelaPrincipalState();
 }
 
 class _TelaPrincipalState extends State<TelaPrincipal> {
-
-  //Lista dinamica de obetos da classe pais
+  //Lista dinâmica de objetos da classe PAIS
   List<Pais> dados = [];
-  
-  //carregar os dados do arquivo json
-  carregarDados() async{
-    
+
+  //Carregar os dados do arquivo JSON
+  carregarDados() async {
+    final String arquivo = await rootBundle.loadString('lib/data/paises.json');
+    final dynamic lista = await json.decode(arquivo);
+    setState(() {
+      lista.forEach((item) {
+        dados.add(Pais.fromJson(item));
+      });
+    });
   }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await carregarDados();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
+    return Scaffold(
+      appBar: AppBar(title: Text('IBGE')),
+      body: ListView.builder(
+          itemCount: dados.length,
+          itemBuilder: (context, index) {
+            return Card(
+              child: ListTile(
+                title: Text(dados[index].nome),
+              ),
+            );
+          }),
     );
   }
 }
